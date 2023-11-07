@@ -1,247 +1,166 @@
 import random
+import copy
+import AL
+import ortool as Or
+import crossover as Cr
+import mutation as Mu
+
 #------------------------------[FUNCTION]------------------------------------
-#Xây dựng hàm đọc dữ liệu - READ DATA
-def Data(value):
-    nj = len(value)         #số Job
-    no = len(value[0])      #Số thao tác mỗi Job
-    nm = len(value[0][0])   #Số máy
-    D = [[[0 for k in range(nm)] for j in range(no)] for i in range(nj)]
+
+def Data(input_value):
+    nj = len(input_value)         #số Job
+    no = len(input_value[0])      #Số thao tác mỗi Job
+    nm = len(input_value[0][0])   #Số máy
+    RD = [[[0 for k in range(nm)] for j in range(no)] for i in range(nj)]
     for i in range(nj):
         for j in range(no):
             for k in range(nm):
-                D[i][j][k] = value[i][j][k]
-    return D
-#Xây dựng hàm tìm kiếm địa phương - APPROACH BY LOCALIZATION
-def gen(Data):
-    x = len(Data)
-    y = len(Data[0])
-    z = len(Data[0][0])
-    D2 = [[[D[i][j][k] for k in range(z)] for j in range(y)] for i in range(x)]
-    S = [[[0 for k in range(z)] for j in range(y)] for i in range(x)]
-    for i in range(x):
-        for j in range(y):
-            if min(D2[i][j]) >= 99:
-                continue
-            Min = 99
-            r = random.randint(0, z-1)
-            position = 1
-            for k in range(r, z):
-                if D2[i][j][k] < Min:
-                    Min = D2[i][j][k]
-                    position = k
-            for k in range(r):
-                if D2[i][j][k] < Min:
-                    Min = D2[i][j][k]
-                    position = k
-            S[i][j][position] = 1
-            for q in range(j+1, y):
-                D2[i][q][position] = D2[i][q][position] + D[i][j][position]
-            for w in range(i+1, x):
-                for q in range(y):
-                    D2[w][q][position] = D2[w][q][position] + D[i][j][position]
-    return S
-class JSP:
-    def __init__(self, gen):
-        self.gen = gen
-    #Xây dựng biểu đồ kế hoạch - ASSIGNMENT SCHEMATA
-    def schemata(self):
-        S = self.gen
-        x = len(S)
-        y = len(S[0])
-        z = len(S[0][0])
-        t = [0]*x
-        m = [0]*z
-        Wk = [0]*z
-        S2 = [[[0 for k in range(z)] for j in range(y)] for i in range(x)]
-        for j in range(y):
-            for i in range(x):
-                for k in range(z):
-                    if S[i][j][k] == 1:
-                        S2[i][j][k] = (max(t[i], m[k]), max(t[i], m[k]) + D[i][j][k])
-                        t[i] = max(t[i], m[k]) + D[i][j][k]
-                        m[k] = max(t[i], m[k])
-                        Wk[k] = Wk[k] + D[i][j][k]
-        for i in range(x):
-            for j in range(y):
-                print(f"J{[i+1]}{[j+1]}:", S2[i][j])
-    #Xây dựng hàm đánh giá - EVALUATION
-    def makespans(self):
-        S = self.gen
-        x = len(S)
-        y = len(S[0])
-        z = len(S[0][0])
-        t = [0]*x
-        m = [0]*z
-        Wk = [0]*z
-        S2 = [[[0 for k in range(z)] for j in range(y)] for i in range(x)]
-        for j in range(y):
-            for i in range(x):
-                for k in range(z):
-                    if S[i][j][k] == 1:
-                        S2[i][j][k] = (max(t[i], m[k]), max(t[i], m[k]) + D[i][j][k])
-                        t[i] = max(t[i], m[k]) + D[i][j][k]
-                        m[k] = max(t[i], m[k])
-                        Wk[k] = Wk[k] + D[i][j][k]
-        return max(t)
-    def processing_time(self):
-        S = self.gen
-        x = len(S)
-        y = len(S[0])
-        z = len(S[0][0])
-        t = [0]*x
-        m = [0]*z
-        Wk = [0]*z
-        S2 = [[[0 for k in range(z)] for j in range(y)] for i in range(x)]
-        for j in range(y):
-            for i in range(x):
-                for k in range(z):
-                    if S[i][j][k] == 1:
-                        S2[i][j][k] = (max(t[i], m[k]), max(t[i], m[k]) + D[i][j][k])
-                        t[i] = max(t[i], m[k]) + D[i][j][k]
-                        m[k] = max(t[i], m[k])
-                        Wk[k] = Wk[k] + D[i][j][k]
-        return t
-    def workloads(self):
-        S = self.gen
-        x = len(self.Data)
-        y = len(self.Data[0])
-        z = len(self.Data[0][0])
-        t = [0]*x
-        m = [0]*z
-        Wk = [0]*z
-        S2 = [[[0 for k in range(z)] for j in range(y)] for i in range(x)]
-        for j in range(y):
-            for i in range(x):
-                for k in range(z):
-                    if S[i][j][k] == 1:
-                        S2[i][j][k] = (max(t[i], m[k]), max(t[i], m[k]) + D[i][j][k])
-                        t[i] = max(t[i], m[k]) + D[i][j][k]
-                        m[k] = max(t[i], m[k])
-                        Wk[k] = Wk[k] + D[i][j][k]
-            for i in range(x):
-                W = W + Wk[i]
-        return W
-# Xay dung quan the
-def chromosome(Data_Input,target,loop):
-    nE = [[0 for k in range(2)] for j in range(target)]
-    x = len(Data_Input)
-    y = len(Data_Input[0])
-    z = len(Data_Input[0][0])
-    n = 0
-    n_while = 0
-    while n< target:
-        if n == 0:
-            nE[n][0] = gen(Data_Input)
-            n = n+1
-        else:
-            size = 0
-            compare = 0
-            value = gen(Data_Input)
-            for l in range(0,n):
-                for i in range(x):
-                    for j in range(y):
-                        for k in range(z):
-                            if value[i][j][k] == nE[l][0][i][j][k]:
-                                size = size + 1
-                if size == x*y*z:
-                    compare = compare +1
-                else:
-                    size = 0
-            if compare == 0:
-                nE[n][0] = value
-                n = n+1
-            else:
-                n_while = n_while + 1
-        if n_while == loop:
-            break
-    E = [[0 for k in range(2)] for j in range(n)]
-    for i in range(n):
-        E[i][0] = nE[i][0]
-    for i in range(n):
-        a = JSP(E[i][0])
-        E[i][1] = a.makespans()
-    E1 = sorted(E, key=lambda tup: tup[1])
-    return E1
+                RD[i][j][k] = input_value[i][j][k]
+    return RD
 
-#Xay dung ham Crossover
-def crossover(D,E):
-    a = random.randint(0,len(E)-1)
-    b = random.randint(0,len(E)-1)
-    while a == b:
-        b = random.randint(0,len(E)-1)
-    S1 = E[a][0]
-    S2 = E[b][0]
-    # Lựa chọn vị trí lai ghép
-    i1 = i2 = j1 = j2 = 0
-    while i1 >= i2:
-        i1 = random.randint(0,len(D)-1)
-        i2 = random.randint(0,len(D)-1)
-        j1 = random.randint(0,len(D[0])-1)
-        j2 = random.randint(0,len(D[0])-1)
-        while i1 == i2 and j1 > j2:
-            j1 = random.randint(0,len(D[0])-1)
-            j2 = random.randint(0,len(D[0])-1)
-    C1 = [[[0 for k in range(len(D[0][0]))] for j in range(len(D[0]))] for i in range(len(D))]
-    C2 = [[[0 for k in range(len(D[0][0]))] for j in range(len(D[0]))] for i in range(len(D))]
-    for a in range(0, i1):
-        C1[a] = S2[a]
-        C2[a] = S1[a]
-    for a in range(i1+1, i2):
-        C1[a] = S1[a]
-        C2[a] = S2[a]
-    for a in range(i2+1, len(D)):
-        C2[a] = S1[a]
-        C1[a] = S2[a]
-    if i1 < i2:
-        for b in range(0,j1):
-            C1[i1][b] = S2[i1][b]
-            C2[i1][b] = S1[i1][b]
-        for b in range(j1,len(D[0])):
-            C1[i1][b] = S1[i1][b]
-            C2[i1][b] = S2[i1][b]
-        for b in range(0,j2+1):
-            C1[i2][b] = S1[i2][b]
-            C2[i2][b] = S2[i2][b]
-        for b in range(j2+1,len(D[0])):
-            C1[i2][b] = S2[i2][b]
-        C2[i2][b] = S1[i2][b]
-    return [C1,C2]
-# Xây dựng hàm đột biến
-def mutation1(E):
-    a = random.randint(0,len(E)-1)
-    S = E[a][0]
-    value_S = JSP(S)
-    t = value_S.processing_time()
-    print("Processing Time per Jobs:", t)
-    max_pt = max(t)
-    i = t.index(max_pt)
-    print("jobs have processing time max:", i+1)
+def chromosome(Data_Input,loop):
+    nE = []
+    n = 0
+    n2 = 0
+    while n < loop:
+        EE = []
+        EE = AL.gen1(Data_Input,99)
+        if EE not in nE :
+            nE.append(EE)
+            n = 0
+        else:
+            n += 1
+    while n2 < loop:
+        EE = []
+        EE = AL.gen2(Data_Input,99)
+        if EE not in nE :
+            nE.append(EE)
+            n2 = 0
+        else:
+            n2 += 1
+    E_chromosome = [[0 for k in range(2)] for j in range(len(nE))]
+    for i in range(len(nE)):
+        E_chromosome[i][0] = nE[i]
+        ec = Or.format_data(E_chromosome[i][0],Data_Input)
+        a = Or.JSP_OR(ec)
+        E_chromosome[i][1] = a.makespans()
+    E_chromosome1 = sorted(E_chromosome, key=lambda tup: tup[1])
+    return E_chromosome1
+
+def Genetic_Algorithms(Data_in,population_size,generation,crossover_probability,mutation1_probability,mutation2_probability):
+    D = Data(Data_in)    #Đưa dữ liệu vào mảng D
+    E = chromosome(D,1000)    #Xây dựng quần thể (bộ nhiễm sắc thể choromosome(dữ liệu vào, số lượng gen mong muốn, số vòng lặp random))
+    
+    c = int(population_size*crossover_probability)
+    m1 = int(population_size*mutation1_probability)
+    m2 = int(population_size*mutation2_probability)
+
+    Q = E
+    x = 1
+    while x <= generation:
+        QQ = copy.deepcopy(Q)
+
+        #Lai ghép
+        C1 = [0 for j in range(c)]
+        for i in range(0,c,2):
+            F = Cr.cross(D,Q)
+            C1[i] = F[0]
+            C1[i+1] = F[1]
+
+        #Đột biến kiểu 1
+        M1 = [0 for j in range(m1)]
+        for i in range(m1):
+            M1[i] = Mu.mutation1(C1,D)
+
+        #Đột biến kiểu 2
+        M2 = [0 for j in range(m2)]
+        for i in range(m2):
+            M2[i] = Mu.mutation2(C1,D)
+
+        #Gộp các tổ hợp
+        C1.extend(M1)
+        C1.extend(M2)
+        # Tạo mảng Q2 bao gồm cả chỉ số đánh giá Makespans
+        Q2 = [[0 for j in range(2)] for k in range(population_size)]
+        for i3 in range(len(Q2)):
+            Q2[i3][0] = C1[i3]
+            q2f = Or.format_data(Q2[i3][0],D)
+            Q2[i3][1] = Or.JSP_OR(q2f).makespans()
+        # Gộp G2 vào tập quần thể ban đầu
+        Q2.extend(QQ)
+        # Sắp xếp các phần tử tỏng Q2 theo thứ tự tăng dần Cmax
+        QQ2 = sorted(Q2, key=lambda tup: tup[1])
+        # Loại bỏ các phần tử giống nhau trong QQ2 lưu vào QQ3
+        QQ3 = []
+        for element in QQ2:
+            if element not in QQ3:
+                QQ3.append(element)
+        # Lấy n phần tử đầu của QQ3 thay vào Q
+        Q = QQ3[:population_size]
+        x += 1
+    Assignment = Q[0][0]
+    Assf = Or.format_data(Assignment,D)
+    print("________________________BEST SOLUTION_____________________")
+    for i in range(len(Assf)):
+        print(Assf[i])
+    Or.JSP_OR(Assf).scheduling()
+    print("Makespans : = ", Or.JSP_OR(Assf).makespans())
+    print("Workloads : = ", Or.JSP_OR(Assf).workloads())
+    print("Workloads per Machines : = ", Or.JSP_OR(Assf).workloads_per_machine())
+    print("Time per Jobs : = ", Or.JSP_OR(Assf).processing_time())
 #-----------------------------[MAIN]--------------------------------------------------------
 values = [
-        [   # Layer 0
-            [1, 3, 4, 1],
-            [3, 8, 2, 1],
-            [3, 5, 4, 7]
-        ],
-        [   # Layer 1
-            [4, 1, 1, 4],
-            [2, 3, 9, 3],
-            [9, 1, 2, 2]
-        ],
-        [   # Layer 2
-            [8, 6, 3, 5],
-            [4, 5, 8, 1],
-            [99, 99, 99, 99]
-        ]
+    [   # Job 1
+        [1,4,6,9,3,5,2,8,9,5],
+        [4,1,1,3,4,8,10,4,11,4],
+        [3,2,5,1,5,6,9,5,10,3]
+    ],
+    [   # Job 2
+        [2,10,4,5,9,8,4,15,8,4],
+        [4,8,7,1,9,6,1,10,7,1],
+        [6,11,2,7,5,3,5,14,9,2]
+    ],
+    [   # Job 3
+        [8,5,8,9,4,3,5,3,8,1],
+        [9,3,6,1,2,6,4,1,7,2],
+        [7,1,8,5,4,9,1,2,3,4]
+    ],
+    [   # Job 4
+        [5,10,6,4,9,5,1,7,1,6],
+        [4,2,3,8,7,4,6,9,8,4],
+        [7,3,12,1,6,5,8,3,5,2]
+    ],
+    [   # Job 5
+        [7,10,4,5,6,3,5,15,2,6],
+        [5,6,3,9,8,2,8,6,1,7],
+        [6,1,4,1,10,4,3,11,13,9]
+    ],
+    [   # Job 6
+        [8,9,10,8,4,2,7,8,3,10],
+        [7,3,12,5,4,3,6,9,2,15],
+        [4,7,3,6,3,4,1,5,1,11]
+    ],
+    [   # Job 7
+        [1,7,8,3,4,9,4,13,10,7],
+        [3,8,1,2,3,6,11,2,13,3],
+        [5,4,2,1,2,1,8,14,5,7]
+    ],
+    [   # Job 8
+        [5,7,11,3,2,9,8,5,12,8],
+        [8,3,10,7,5,13,4,6,8,4],
+        [6,2,13,5,4,3,5,7,9,5]
+    ],
+    [   # Job 9
+        [3,9,1,3,8,1,6,7,5,4],
+        [4,6,2,5,7,3,1,9,6,7],
+        [8,5,4,8,6,1,2,3,10,12]
+    ],
+    [   # Job 10
+        [4,3,1,6,7,1,2,6,20,6],
+        [3,1,8,1,9,4,1,4,17,15],
+        [9,2,4,2,3,5,2,4,10,23]
     ]
-n = 10
-D = Data(values)    #Đưa dữ liệu vào mảng D
-E = chromosome(D,100,1000)    #Xây dựng quần thể (bộ nhiễm sắc thể choromosome(dữ liệu vào, số lượng gen mong muốn, số vòng lặp random))
-P1 = E[:n]
-C = [0 for k in range(n)]
-for i in range(0,n,2):
-    F = crossover(D,P1)
-    C[i] = F[0]
-    C[i+1] = F[1]
-mutation1(P1)
+]
+
+Genetic_Algorithms(values,100,100,0.8,0.1,0.1)
 #-----------------------------[END]---------------------------------------------------------
