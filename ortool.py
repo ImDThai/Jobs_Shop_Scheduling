@@ -15,11 +15,13 @@ def format_data(gen,data_in):
             for k in range(z):
                 if Assignment_Scheduling[i][j][k] == 1:
                     Assignment_Scheduling2[i][j] = (k,data_in[i][j][k])
-    for i in range(x):
-        for j in range(y):
-            if Assignment_Scheduling2[i][j] == 0:
-                del Assignment_Scheduling2[i][j]
-    return Assignment_Scheduling2
+    
+    result = []
+    for row in Assignment_Scheduling2:
+        new_row = [elem for elem in row if elem != 0]
+        result.append(new_row)
+
+    return result
 
 #Xây dựng thư viện các thuộc tính
 class JSP_OR():
@@ -112,7 +114,7 @@ class JSP_OR():
             self.assigned_jobs = assigned_jobs
 
     def makespans(self):
-        Cmax = self.Makespans
+        Cmax = int(self.Makespans)
         return Cmax
 
     def scheduling(self):
