@@ -47,7 +47,7 @@ def chromosome(Data_Input,loop):
 
 def Genetic_Algorithms(Data_in,population_size,generation,crossover_probability,mutation1_probability,mutation2_probability):
     D = Data_in    #Đưa dữ liệu vào mảng D
-    E = chromosome(D,10000)    #Xây dựng quần thể (bộ nhiễm sắc thể choromosome(dữ liệu vào, số lượng gen mong muốn, số vòng lặp random))
+    E = chromosome(D,1000)    #Xây dựng quần thể (bộ nhiễm sắc thể choromosome(dữ liệu vào, số lượng gen mong muốn, số vòng lặp random))
     
     c = int(population_size*crossover_probability)
     m1 = int(population_size*mutation1_probability)
@@ -101,11 +101,12 @@ def Genetic_Algorithms(Data_in,population_size,generation,crossover_probability,
         # Lấy n phần tử đầu của QQ3 thay vào Q
         Q = QQ3[:population_size]
         if Q[0][1] <= Cmax_find or Q[0][2] <= WL_find:
-            if Q[0][0] not in Assignment :
-                Cmax_find = Q[0][1]
-                WL_find = Q[0][2]
-                Assignment.append(Q[0][0])
-                Assf = Or.format_data(Q[0][0],D)
+            Cmax_find = Q[0][1]
+            WL_find = Q[0][2]
+            Assf = Or.format_data(Q[0][0],D)
+            WL = Or.JSP_OR(Assf).workloads_per_machine()
+            if WL not in Assignment:
+                Assignment.append(WL)
                 print(f"________________________BEST SOLUTION IN GENERATION {x}_______________________")
                 for i in range(len(Assf)):
                     print(Assf[i])
@@ -117,6 +118,6 @@ def Genetic_Algorithms(Data_in,population_size,generation,crossover_probability,
                 y += 1
         x += 1
 #-----------------------------[MAIN]--------------------------------------------------------
-values = Read_Data('DT1.txt')
-Genetic_Algorithms(values,20,10,0.8,0.1,0.1)
+values = Read_Data('kacem2002_5.txt')
+Genetic_Algorithms(values,100,100,1,0.5,0.5)
 #-----------------------------[END]---------------------------------------------------------
