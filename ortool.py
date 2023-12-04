@@ -28,10 +28,10 @@ class JSP_OR():
     def __init__(self, jobs_data):
         self.jobs_data = jobs_data
         
-        machines_count = 1 + max(task[0] for job in jobs_data for task in job)
+        self.machines_count = 1 + max(task[0] for job in jobs_data for task in job)
         # Tinh W/Wk
         Data = self.jobs_data
-        W = [0 for i in range(machines_count)]
+        W = [0 for i in range(self.machines_count)]
         T = [0 for i in range(len(Data))]
         for i in range(len(Data)):
             for j in range(len(Data[i])):
@@ -42,7 +42,7 @@ class JSP_OR():
         self.total_workloads = sum(W)
         self.WLs = W
 
-        self.all_machines = range(machines_count)  # Make it a class member
+        self.all_machines = range(self.machines_count)  # Make it a class member
         horizon = sum(task[1] for job in jobs_data for task in job)
 
         # Create the model.
@@ -119,27 +119,21 @@ class JSP_OR():
 
     def scheduling(self):
         output = ""
+        OUT = [[] for _ in range(self.machines_count)]
         for machine in self.all_machines:  # Access all_machines from the class
             # Sort by starting time.
             self.assigned_jobs[machine].sort()
-            sol_line_tasks = "Machine " + str(machine + 1) + ": "
-            sol_line = "           "
+            OUT2 = [[] for _ in range(len(self.assigned_jobs[machine]))]
+            i = 0
             for assigned_task in self.assigned_jobs[machine]:  # Access assigned_jobs from the class
-                name = f"job_{assigned_task.job + 1}_task_{assigned_task.index + 1}"
-                # Add spaces to output to align columns.
-                sol_line_tasks += f"{name:15}"
-
                 start = assigned_task.start
                 duration = assigned_task.duration
-                sol_tmp = f"[{start},{start + duration}]"
-                # Add spaces to output to align columns.
-                sol_line += f"{sol_tmp:15}"
-            sol_line += "\n"
-            sol_line_tasks += "\n"
-            output += sol_line_tasks
-            output += sol_line
-        print(output)
-
+                assign = (assigned_task.job + 1, assigned_task.index + 1, start, start + duration)
+                OUT2[i].extend(assign)
+                i += 1
+            OUT[machine].extend(OUT2)
+        return OUT
+    
     def workloads_per_machine(self):
         wpm = self.WLs
         return wpm

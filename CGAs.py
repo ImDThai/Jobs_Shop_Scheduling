@@ -5,9 +5,9 @@ import ortool as Or
 import crossover as Cr
 import mutation as Mu
 import numpy as np
+import chart
 
 #------------------------------[FUNCTION]------------------------------------
-
 def Read_Data(filename='data.txt'):
     Structure_data = np.genfromtxt(filename, dtype=int, max_rows=1)
     Data = np.genfromtxt(filename, dtype = int, skip_header = 1)
@@ -15,7 +15,7 @@ def Read_Data(filename='data.txt'):
     Data.tolist()
     return Data
 
-def chromosome(Data_Input,loop):
+def chromosome(Data_Input,loop,Gens_estimate):
     nE = []
     n = 0
     n2 = 0
@@ -27,7 +27,9 @@ def chromosome(Data_Input,loop):
             n = 0
         else:
             n += 1
-    while n2 < loop:
+        if len(nE) == Gens_estimate:
+            n = loop
+    while n2 < loop :
         EE = []
         EE = AL.gen2(Data_Input,99)
         if EE not in nE :
@@ -35,6 +37,8 @@ def chromosome(Data_Input,loop):
             n2 = 0
         else:
             n2 += 1
+        if len(nE) == Gens_estimate:
+            n2 = loop
     E_chromosome = [[0 for k in range(3)] for j in range(len(nE))]
     for i in range(len(nE)):
         E_chromosome[i][0] = nE[i]
@@ -47,7 +51,7 @@ def chromosome(Data_Input,loop):
 
 def Genetic_Algorithms(Data_in,population_size,generation,crossover_probability,mutation1_probability,mutation2_probability):
     D = Data_in    #Đưa dữ liệu vào mảng D
-    E = chromosome(D,1000)    #Xây dựng quần thể (bộ nhiễm sắc thể choromosome(dữ liệu vào, số lượng gen mong muốn, số vòng lặp random))
+    E = chromosome(D,1000,1000)    #Xây dựng quần thể (bộ nhiễm sắc thể choromosome(dữ liệu vào, số lượng gen mong muốn, số vòng lặp random))
     
     c = int(population_size*crossover_probability)
     m1 = int(population_size*mutation1_probability)
@@ -107,17 +111,13 @@ def Genetic_Algorithms(Data_in,population_size,generation,crossover_probability,
             WL = Or.JSP_OR(Assf).workloads_per_machine()
             if WL not in Assignment:
                 Assignment.append(WL)
-                print(f"________________________BEST SOLUTION IN GENERATION {x}_______________________")
-                for i in range(len(Assf)):
-                    print(Assf[i])
-                Or.JSP_OR(Assf).scheduling()
-                print("Makespans : = ", Or.JSP_OR(Assf).makespans())
-                print("Workloads : = ", Or.JSP_OR(Assf).workloads())
-                print("Workloads per Machines : = ", Or.JSP_OR(Assf).workloads_per_machine())
-                print("Time per Jobs : = ", Or.JSP_OR(Assf).processing_time())
+                Scheduling = Or.JSP_OR(Assf).scheduling()
+                Makespans  =  Or.JSP_OR(Assf).makespans()
+                Workloads = Or.JSP_OR(Assf).workloads()
                 y += 1
+                chart.showGC(Scheduling, Makespans, Workloads)
         x += 1
 #-----------------------------[MAIN]--------------------------------------------------------
-values = Read_Data('kacem2002_5.txt')
-Genetic_Algorithms(values,100,100,1,0.5,0.5)
+values = Read_Data('kacem2002_1.txt')
+Genetic_Algorithms(values,10,100,1,0.5,0.5)
 #-----------------------------[END]---------------------------------------------------------
