@@ -1,4 +1,6 @@
 import random
+import numpy as np
+import ortool as Or
 # The algorithm uses data from the beginning of the lesson to select operations on machines.
 # The output data marks the machines selected for each operation
 # The following two algorithms are mentioned in the article: Imed Kacem, Slim Hammadi
@@ -67,3 +69,44 @@ def gen2(gen2_data,limited_value2):
                     D2[i][j][PositionK] = D2[i][j][PositionK] + gen2_data[PositionI][PositionJ][PositionK]
         w += 1
     return S2
+
+def Read_Data(filename='data.txt'):
+    Structure_data = np.genfromtxt(filename, dtype=int, max_rows=1)
+    Data = np.genfromtxt(filename, dtype = int, skip_header = 1)
+    Data = Data.reshape(Structure_data[0], Structure_data[1], Structure_data[2])
+    Data.tolist()
+    return Data
+
+def chromosome(Data_Input,loop,Gens_estimate):
+    nE = []
+    n = 0
+    n2 = 0
+    while n < loop:
+        EE = []
+        EE = gen1(Data_Input,99)
+        if EE not in nE :
+            nE.append(EE)
+            n = 0
+        else:
+            n += 1
+        if len(nE) == Gens_estimate:
+            n = loop
+    while n2 < loop :
+        EE = []
+        EE = gen2(Data_Input,99)
+        if EE not in nE :
+            nE.append(EE)
+            n2 = 0
+        else:
+            n2 += 1
+        if len(nE) == Gens_estimate:
+            n2 = loop
+    E_chromosome = [[0 for k in range(3)] for j in range(len(nE))]
+    for i in range(len(nE)):
+        E_chromosome[i][0] = nE[i]
+        ec = Or.format_data(E_chromosome[i][0],Data_Input)
+        a = Or.JSP_OR(ec)
+        E_chromosome[i][1] = a.makespans()
+        E_chromosome[i][2] = a.workloads()
+    E_chromosome1 = sorted(E_chromosome, key=lambda sublist: (sublist[1], sublist[2]))
+    return E_chromosome1

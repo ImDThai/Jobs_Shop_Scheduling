@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import filedialog
 import random
 import copy
 import AL
@@ -5,7 +7,6 @@ import ortool as Or
 import crossover as Cr
 import mutation as Mu
 import numpy as np
-import chart
 
 #------------------------------[FUNCTION]------------------------------------
 def Read_Data(filename='data.txt'):
@@ -114,10 +115,72 @@ def Genetic_Algorithms(Data_in,population_size,generation,crossover_probability,
                 Scheduling = Or.JSP_OR(Assf).scheduling()
                 Makespans  =  Or.JSP_OR(Assf).makespans()
                 Workloads = Or.JSP_OR(Assf).workloads()
+                print(Scheduling)
                 y += 1
-                chart.showGC(Scheduling, Makespans, Workloads)
         x += 1
 #-----------------------------[MAIN]--------------------------------------------------------
-values = Read_Data('kacem2002_1.txt')
-Genetic_Algorithms(values,10,100,1,0.5,0.5)
+class GeneticAlgorithmGUI:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Genetic Algorithm Parameters")
+
+        # Variables for input parameters
+        self.filename = tk.StringVar()
+        self.population_size = tk.IntVar(value=10)
+        self.generations = tk.IntVar(value=100)
+        self.crossover_probability = tk.DoubleVar(value=1.0)
+        self.mutation1_probability = tk.DoubleVar(value=0.5)
+        self.mutation2_probability = tk.DoubleVar(value=0.5)
+
+        # Create and place widgets
+        self.create_widgets()
+        self.place_widgets()
+
+    def create_widgets(self):
+        tk.Label(self.master, text="File Name:").grid(row=0, column=0, sticky="e")
+        tk.Entry(self.master, textvariable=self.filename, state="readonly").grid(row=0, column=1, padx=5, pady=5)
+        tk.Button(self.master, text="Browse", command=self.browse_file).grid(row=0, column=2, padx=5, pady=5)
+
+        tk.Label(self.master, text="Population Size:").grid(row=1, column=0, sticky="e")
+        tk.Entry(self.master, textvariable=self.population_size).grid(row=1, column=1, padx=5, pady=5)
+
+        tk.Label(self.master, text="Generations:").grid(row=2, column=0, sticky="e")
+        tk.Entry(self.master, textvariable=self.generations).grid(row=2, column=1, padx=5, pady=5)
+
+        tk.Label(self.master, text="Crossover Probability:").grid(row=3, column=0, sticky="e")
+        tk.Entry(self.master, textvariable=self.crossover_probability).grid(row=3, column=1, padx=5, pady=5)
+
+        tk.Label(self.master, text="Mutation 1 Probability:").grid(row=4, column=0, sticky="e")
+        tk.Entry(self.master, textvariable=self.mutation1_probability).grid(row=4, column=1, padx=5, pady=5)
+
+        tk.Label(self.master, text="Mutation 2 Probability:").grid(row=5, column=0, sticky="e")
+        tk.Entry(self.master, textvariable=self.mutation2_probability).grid(row=5, column=1, padx=5, pady=5)
+
+        tk.Button(self.master, text="Run Genetic Algorithm", command=self.run_genetic_algorithm).grid(row=6, column=1, pady=10)
+
+    def place_widgets(self):
+        for child in self.master.winfo_children():
+            child.grid_configure(padx=10, pady=5)
+
+    def browse_file(self):
+        file_path = filedialog.askopenfilename(initialdir="/", title="Select file", filetypes=[("Text files", "*.txt")])
+        if file_path:
+            self.filename.set(file_path)
+
+    def run_genetic_algorithm(self):
+        file_path = self.filename.get()
+        if file_path:
+            values = Read_Data(file_path)
+            Genetic_Algorithms(
+                values,
+                self.population_size.get(),
+                self.generations.get(),
+                self.crossover_probability.get(),
+                self.mutation1_probability.get(),
+                self.mutation2_probability.get()
+            )
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = GeneticAlgorithmGUI(root)
+    root.mainloop()
 #-----------------------------[END]---------------------------------------------------------
